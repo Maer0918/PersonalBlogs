@@ -4,55 +4,37 @@
 		<title>Maer's Blogs</title>
 		<meta charset="utf-8">
 		<!-- 由于设置了 express 的静态资源 /public，所以可以直接访问 public，不用写 /public -->
-		<link rel="stylesheet" type="text/css" href="stylesheets/index.css">
 		<script src="https://lib.baomitu.com/vue/2.6.10/vue.min.js"></script>
 		<script src="https://cdn.bootcss.com/axios/0.19.2/axios.min.js"></script>
-		<script src="javascripts/index.js"></script>
+		<link rel="stylesheet" type="text/css" href="stylesheets/public.css">
+		<link rel="stylesheet" type="text/css" href="stylesheets/index.css">
 	</head>
 	<body>
-		<header>
-			<div><h1><a href="/">Maer's Blogs</a></h1></div>
-			<nav>
-				<div>
-					<a>学习笔记</a>
-				</div>
-				<div>
-					<a>生活记录</a>
-				</div>
-			</nav>
-		</header>
-		<div id="main">
-			<div class="level1">
-				<h1>学习笔记</h1>
-				<div class="level2">
-					<h2>JavaScript 高级程序设计</h2>
-					<ul>
-						<li><a>《JavaScript 高级程序设计》第四章</a></li>
-						<li><a>《JavaScript 高级程序设计》第五章</a></li>
-						<li><a>《JavaScript 高级程序设计》第六章</a></li>
-					</ul>
-				</div>
-				<div class="level2">
-					<h2>JavaScript 教程</h2>
-					<ul>
-						<li><a>异步操作概述</a></li>
-						<li><a>定时器</a></li>
-						<li><a>Promise 对象</a></li>
-					</ul>
+		<div id="app">
+			<header>
+				<div class="icon-style"><h1><a href="/">Maer's Blogs</a></h1></div>
+				<nav>
+					<navi :classes="classes" :books="books"></navi>
+				</nav>
+			</header>
+			<div id="main">
+				<div class="level1" v-for="cla in classes">
+					<h1>{{ cla.name }}</h1>
+					<div class="level2" v-for="book in corBooks(cla)">
+						<h2 class="book-title" :id="'book'+book.id">{{ book.name }}</h2>
+						<ul class="book-content">
+							<li v-for="article in corArticles(book)">
+								<a :href="'/article/'+article.id">{{ article.name }}</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
-			<div class="level1">
-				<h1>生活记录</h1>
-				<div class="level2">
-					<h2>饥荒攻略</h2>
-					<ul>
-						<li><a> 饥荒联机版厨师沃利生存攻略 </a></li>
-					</ul>
-				</div>
-			</div>
+			<footer>
+				联系博主：maer0918@qq.com
+			</footer>
 		</div>
-		<footer>
-			联系博主：maer0918@qq.com
-		</footer>
+		<!-- 由于在挂载必须处于目标挂载元素后，故将 script 置末 -->
+		<script src="javascripts/index.js"></script>
 	</body>
 </html>

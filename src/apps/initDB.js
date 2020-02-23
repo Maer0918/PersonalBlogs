@@ -33,8 +33,11 @@ function getArticlesSync(absDir) {
 			if (sta.isFile()) {
 				var splitedDir = dir.split('/')
 				var bookName = splitedDir.pop()
+				var aName = fname.split('.')
+				aName.pop()
+				aName = aName.join('.')
 				articles.push({
-					'name': fname.split('.')[0],
+					'name': aName,
 					'absPath': absPath,
 					'bookName': bookName
 				})
@@ -51,7 +54,9 @@ function getArticlesSync(absDir) {
 function getHeadersSync(absPath) {
 	var article = fs.readFileSync(absPath, 'utf-8')
 	var tree = md.parse(article)
-	var articleName = absPath.split('/').pop().split('.')[0]
+	var articleName = absPath.split('/').pop().split('.')
+	articleName.pop()
+	articleName = articleName.join('.')
 	// 过滤出标题
 	var headers = tree.filter( ele => {
 		if (ele instanceof Array)
@@ -134,7 +139,7 @@ var initArticles = () => {
 				if (err) {
 					throw err
 				} else {
-					// console.log(`count/length: ${count++}/${articles.length-1} article.name: ${article.name} article.absPath: ${article.absPath} article.bookName: ${article.bookName} book data.id: ${data.id}`)
+					console.log(`count/length: ${count++}/${articles.length-1} article.name: ${article.name} article.absPath: ${article.absPath} article.bookName: ${article.bookName} book data.id: ${data.id}`)
 					db.run('INSERT INTO articles (name, path, book) VALUES (?, ?, ?)', article.name, article.absPath, data.id, error => {
 						if (error) throw error
 						else resolve()
@@ -154,7 +159,7 @@ var initHeaders = () => {
 				if (err) {
 					throw err
 				} else {
-					// console.log(`count/length ${count++}/${headers.length-1} headers.name: ${header.name} header.arcticleName: ${header.articleName} data.id: `)
+					console.log(`count/length ${count++}/${headers.length-1} headers.name: ${header.name} header.arcticleName: ${header.articleName} data.id: `)
 					db.run('INSERT INTO headers (name, level, article) VALUES (?, ?, ?)', header.name, header.level, data.id, error => {
 						if (error) throw error
 						else resolve()
