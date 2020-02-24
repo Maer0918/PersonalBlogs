@@ -1,75 +1,82 @@
 const fs = require('fs')
 const path = require('path')
-const md = require('markdown').markdown
+const md = require('marked')
 const sqlite3 = require('sqlite3')
 
-const filesDir = path.resolve('../public/files')
+const baseDir = path.resolve('../public/files')
 const dbUrl = path.resolve('../databases/blogs.db')
-const classes = [{name: '学习笔记'}, {name: '生活记录'}]
 
-// 同步方式获取书籍清单
-function getBooksSync(absPath) {
-	return fs.readdirSync(absPath).map(fname => {
+// 同步方式获取分类
+function getClassesSync(absPath) {
+	return fs.readdirSync(absPath).map(f => {
 		return {
-			name: fname,
-			className: classes[0].name
+			name: f
 		}
 	})
 }
 
-// 同步方式获取文章清单
-function getArticlesSync(absDir) {
-	// 文章数组
-	var articles = []
-	// 文件夹队列
-	var dirs = [absDir]
-	while (dirs.length > 0) {
-		var dir = dirs.shift()
-		var files = fs.readdirSync(dir)
-		files.forEach( fname => {
-			var absPath = path.join(dir, fname)
-			var sta = fs.statSync(absPath)
-			// 如果是文件则推入文章数组
-			if (sta.isFile()) {
-				var splitedDir = dir.split('/')
-				var bookName = splitedDir.pop()
-				articles.push({
-					'name': fname.split('.')[0],
-					'absPath': absPath,
-					'bookName': bookName
-				})
-			// 否则推入文件夹队列
-			} else {
-				dirs.push(absPath)
+// 同步方式获取书籍清单
+function getBooksSync(classes) {
+	var books = []
+	classes.forEach(c => {
+		var bs = fs.readdirSync(path.join(baseDir, c.name)).map(fname => {
+			return {
+				name: fname,
+				className: c.name
 			}
 		})
-	}
+		books = books.concat(bs)
+	})
+	return books
+}
+
+// 同步方式获取文章清单
+function getArticlesSync(books) {
+	// 文章数组
+	var articles = []
+	books.forEach(b => {
+		var bookPath = path.join(baseDir, b.className, b.name)
+		var as = fs.readdirSync(bookPath).map(fname => {
+			var aName = fname.split('.')
+			aName.pop()
+			aName = aName.join('.')
+			return {
+				'name': aName,
+				'absPath': path.join(bookPath, fname),
+				'bookName': b.name
+			}
+		})
+		articles = articles.concat(as)
+	})
 	return articles
 }
 
 // 同步方式获取文章标题
 function getHeadersSync(absPath) {
 	var article = fs.readFileSync(absPath, 'utf-8')
-	var tree = md.parse(article)
-	var articleName = absPath.split('/').pop().split('.')[0]
+	var tree = md.lexer(article)
+	var articleName = absPath.split('/').pop().split('.')
+	articleName.pop()
+	articleName = articleName.join('.')
 	// 过滤出标题
 	var headers = tree.filter( ele => {
-		if (ele instanceof Array)
-			return ele[0] === 'header'
+		return ele.type === 'heading'
 	})
+	console.log(`haeders: ${headers}`)
 	// 转化成对象数组
 	var headers = headers.map( ele => {
 		return { 
-			name: ele[2], 
-			level: ele[1].level,
+			name: ele.text, 
+			level: ele.depth,
 			'articleName': articleName
 		}
 	})
 	return headers
 }
 
-var books = getBooksSync(filesDir)
-var articles = getArticlesSync(filesDir)
+var classes = getClassesSync(baseDir)
+var books = getBooksSync(classes)
+var articles = getArticlesSync(books)
 var headers = articles.reduce((prev, cur) => {
 	// 如果 prev 是数组，直接拼接
 	if (prev instanceof Array)
@@ -134,7 +141,7 @@ var initArticles = () => {
 				if (err) {
 					throw err
 				} else {
-					// console.log(`count/length: ${count++}/${articles.length-1} article.name: ${article.name} article.absPath: ${article.absPath} article.bookName: ${article.bookName} book data.id: ${data.id}`)
+					console.log(`count/length: ${count++}/${articles.length-1} article.name: ${article.name} article.absPath: ${article.absPath} article.bookName: ${article.bookName} book data.id: ${data.id}`)
 					db.run('INSERT INTO articles (name, path, book) VALUES (?, ?, ?)', article.name, article.absPath, data.id, error => {
 						if (error) throw error
 						else resolve()
@@ -154,7 +161,7 @@ var initHeaders = () => {
 				if (err) {
 					throw err
 				} else {
-					// console.log(`count/length ${count++}/${headers.length-1} headers.name: ${header.name} header.arcticleName: ${header.articleName} data.id: `)
+					console.log(`count/length ${count++}/${headers.length-1} headers.name: ${header.name} header.arcticleName: ${header.articleName} data.id: `)
 					db.run('INSERT INTO headers (name, level, article) VALUES (?, ?, ?)', header.name, header.level, data.id, error => {
 						if (error) throw error
 						else resolve()
@@ -165,8 +172,10 @@ var initHeaders = () => {
 	})
 }
 
+// 链式执行异步操作
 initDb().then(initClasses)
 	.then(initBooks)
 	.then(initArticles)
 	.then(initHeaders)
+
 db.close()

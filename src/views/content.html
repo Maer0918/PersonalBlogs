@@ -29,11 +29,11 @@
 			</div>
 			<aside>
 				<p>文章列表</p>
-				<ul class="level1">
-					<li v-for="book in books">
+				<ul >
+					<li v-for="book in books" class="level1">
 						<a :href="'/#book'+book.id">{{ book.name }}</a>
-						<ul class="level2">
-							<li v-for="article in corArticles(book)">
+						<ul >
+							<li v-for="article in corArticles(book)" class="level2">
 								<a :href="'/article/'+article.id">{{ article.name }}</a>
 							</li>
 						</ul>

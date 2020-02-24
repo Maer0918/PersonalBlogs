@@ -56,17 +56,27 @@ aside {
 
 aside a {
 	padding-left: 17px;
+	display: block;
 }
 
 aside p {
 	padding-left: 17px;
 	color: white;
-	font-size: bold;
+	font-weight: bold;
+	line-height: 3em;
+}
+
+aside li {
+	line-height: 2em;
 }
 
 .level2 {
 	padding-left: 13px;
 	display: none;
+}
+
+.level1:hover {
+	background-color: #767676;
 }
 
 .level1:hover .level2{

@@ -31,12 +31,14 @@ var app = new Vue({
 		headers: null
 	},
 	methods: {
+		// corresbonding books 获取对应书籍
 		corBooks: function(cla) {
 			if (this.books != null)
 				return this.books.filter(b => {
 					return b['class'] == cla.id
 				})
 		},
+		// corresbonding articles 获取对应文章
 		corArticles: function(book) {
 			if (this.articles != null)
 				return this.articles.filter(a => {
@@ -57,6 +59,8 @@ var app = new Vue({
 		}
 	},
 	computed: {
+		// 由于暂时不知如何从后端在发回文件同时发回附带文章 ID
+		// 故暂且从 URL 获取
 		articleID: function () {
 			return parseInt(document.URL.split('/').pop())
 		}
@@ -85,12 +89,23 @@ var app = new Vue({
 		axios.get('/getArticleMD/' + articleId).then(res => {
 			this.articleMD = res.data
 			// 更新文章内容
-			document.querySelector("article").innerHTML = marked(res.data)
-		})
+			var articleElement = document.querySelector("article")
+			articleElement.innerHTML = marked(res.data)
+			// 筛选 HTML 标题
+			var hs = articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
+			// 建立标题名到标题的映射对象，降低目录标题到文章标题映射处理的时间复杂度
+			var hso = {}
+			hs.forEach(h => {
+				hso[h.textContent] = h
+			})
 
-		// 获取指定文章对应标题
-		axios.get('/getArticleHeaders/' + articleId).then(res => {
-			this.headers = res.data
+			// 获取指定文章对应标题
+			axios.get('/getArticleHeaders/' + articleId).then(res => {
+				this.headers = res.data
+				this.headers.forEach(h => {
+					hso[h.name].id = 'header' + h.id
+				})
+			})
 		})
 	}
 })
