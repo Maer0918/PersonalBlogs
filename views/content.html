@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Maer's Blogs</title>
+		<meta charset="utf-8">
+		<!-- 由于设置了 express 的静态资源 /public，所以可以直接访问 public，不用写 /public -->
+		<script src="https://lib.baomitu.com/vue/2.6.10/vue.min.js"></script>
+		<script src="https://cdn.bootcss.com/axios/0.19.2/axios.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../stylesheets/public.css">
+		<link rel="stylesheet" type="text/css" href="../stylesheets/content.css">
+	</head>
+	<body>
+		<div id="app">
+			<header>
+				<div class="icon-style"><h1><a href="/">Maer's Blogs</a></h1></div>
+				<nav>
+					<navi :classes="classes" :books="books"></navi>
+				</nav>
+			</header>
+			<div id="main">
+				<div id="category">
+					<p>目录列表</p>
+					<ul>
+						<li v-for="header in headers"><a :href="'#header'+header.id">{{ header.name }}</a></li>
+					</ul>
+				</div>
+				<article></article>
+			</div>
+			<aside>
+				<p>文章列表</p>
+				<ul >
+					<li v-for="book in books" class="level1">
+						<a :href="'/#book'+book.id">{{ book.name }}</a>
+						<ul >
+							<li v-for="article in corArticles(book)" class="level2">
+								<a :href="'/article/'+article.id">{{ article.name }}</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</aside>
+			<div class="noflo"></div>
+			<footer>
+				联系博主：maer0918@qq.com
+			</footer>
+		</div>
+		<!-- 由于在挂载必须处于目标挂载元素后，故将 script 置末 -->
+		<script src="../javascripts/content.js"></script>
+	</body>
+</html>
