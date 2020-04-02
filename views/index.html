@@ -3,6 +3,7 @@
 	<head>
 		<title>Maer's Blogs</title>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<!-- 由于设置了 express 的静态资源 /public，所以可以直接访问 public，不用写 /public -->
 		<script src="https://lib.baomitu.com/vue/2.6.10/vue.min.js"></script>
 		<script src="https://cdn.bootcss.com/axios/0.19.2/axios.min.js"></script>
@@ -12,10 +13,7 @@
 	<body>
 		<div id="app">
 			<header>
-				<div class="icon-style"><h1><a href="/">Maer's Blogs</a></h1></div>
-				<nav>
-					<navi :classes="classes" :books="books"></navi>
-				</nav>
+				<navi :classes="classes" :books="books"></navi>
 			</header>
 			<div id="main">
 				<div class="level1" v-for="cla in classes">
@@ -35,6 +33,7 @@
 			</footer>
 		</div>
 		<!-- 由于在挂载必须处于目标挂载元素后，故将 script 置末 -->
+		<script src="javascripts/public.js"></script>
 		<script src="javascripts/index.js"></script>
 	</body>
 </html>
